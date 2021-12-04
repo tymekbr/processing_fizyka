@@ -1,0 +1,549 @@
+
+float G = 1; //stała grawitacji
+
+float[][] baza = {{-1/sqrt(2), 1/sqrt(2)}, {1, 0}, {0, -1}}; //projekcja
+
+float dt = .001; // time step
+
+float t = 0; //całkowity czas
+//parametry GUI
+String[] main_menu = {"Lista planet", "Nowa planeta", "Parametry układu", "Display", "Pomoc"}; //menu główne
+float bok, delta; // parametry menu
+float u = 30; //parametr zoomu
+float theta = 0; // kąt obrotu wokół OZ
+boolean show_menu;
+String menu; //słowa klucze: main, list, add...
+
+int orbital_centre; //planeta wokół której dodamy satelitę
+int wybrana_planeta; //planeta któej parametry wyświetlamy
+boolean pause; //pauza
+boolean show_trace; //pokazać ślad
+boolean scale_planets;// skalowanie promieni
+
+float initial_angle = 0;//domyślna anomalia początkowa przy dodawaniu satelity
+
+//indykatory wejścia
+boolean mass_input, v_input, radius_input;
+String mass_in, v_in, radius_in;
+boolean posx_input, posy_input, posz_input, vx_input, vy_input, vz_input;
+String posx_in, posy_in, posz_in, vx_in, vy_in, vz_in;
+boolean R_input, angle_input;
+String R_in, angle_in;
+
+boolean dt_input;
+String dt_in;
+
+color background;//kolor tła
+color basic;//podstawowy kolor GUI
+
+int GRID; //plaszczyzna siatki
+
+boolean follow_com;// indykator podążania za centrum masy
+boolean sloneczny_on;//indykator wyświetlania układu słonecznego
+
+Uklad solar; //deklaracja klasy uklad - głównej maszynerii programu
+
+ArrayList<Planet> uklad = new ArrayList<Planet>(); //initial system
+
+ArrayList<Planet> sloneczny = new ArrayList<Planet>(); //solar system
+
+ArrayList<Line> gridz = new ArrayList<Line>(); //siatka w płaszczyźnie XY
+ArrayList<Line> gridx = new ArrayList<Line>(); //siatka w płaszczyźnie YZ
+ArrayList<Line> gridy = new ArrayList<Line>(); //siatka w płaszczyźnie ZX
+Planet A = new Planet(new Vector(-3, 0, 0, color(200, 0, 0)), new Vector(0, -sqrt(G*(1000)*3/(5*5)), 0, color(0)), 300);
+
+Planet B = new Planet(new Vector(2, 0.0, .0, color(200, 0, 200)), new Vector(0, sqrt(G*(100)*2/(25)), 0, color(0)), 500);
+
+Planet C = new Planet(new Vector(-5.0, 0.0, 5, color(0, 100, 200)), new Vector(-1, -1, -sqrt(30/10), color(0)), 1000);
+
+float r_scale = 5;
+
+void setup() {
+  delta = .1*width/3;
+  bok = width/3-2*delta;
+
+  GRID = 1;
+
+
+  uklad.add(A);
+  uklad.add(B);
+
+
+
+  for (int i = 0; i < 100; i++) {
+    Planet temp = new Planet(new Vector(random(-5, 5), random(-5, 5), random(-5, 5), color(random(0, 255), random(0, 255), random(0, 255))), new Vector(random(-4, 4), random(-4, 4), random(-4, 4)), random(10, 30), 1);
+    uklad.add(temp);
+  }
+
+  solar = new Uklad(uklad);
+  G = 1.98127*pow(10, -29);//wartość G uwzględniająca nowe jednostki - za podstawową jednostkę odległośći przyjmujemy 1AU, jednostka czasu: 1 rok
+  Planet Sun = new Planet( new Vector(0, 0, 0, color(200, 200, 0)), new Vector(0, 0, 0, color(0)), 2*pow(10, 30), 10);
+  Planet Mercury = new Planet( new Vector(0.3871, 0, 0, color(200, 150, 150)), new Vector(0, sqrt(G*Sun.m/0.3871), 0, color(0)), 3.301*pow(10, 23));
+  Planet Venus = new Planet( new Vector(0.7233, 0, 0, color(200, 150, 0)), new Vector(0, sqrt(G*Sun.m/0.7233), 0, color(0)), 4.867*pow(10, 24));
+  Planet Earth = new Planet( new Vector(1, 0, 0, color(0, 100, 0)), new Vector(0, sqrt(G*Sun.m/1), 0, color(0)), 6*pow(10, 24));
+  Planet Mars = new Planet( new Vector(1.5273, 0, 0, color(200, 0, 0)), new Vector(0, sqrt(G*Sun.m/1.5273), 0, color(0)), 6.417*pow(10, 23));
+  Planet Jupiter = new Planet( new Vector(5.2028, 0, 0, color(50, 50, 0)), new Vector(0, sqrt(G*Sun.m/5.2028), 0, color(0)), 1.899*pow(10, 27));
+  Planet Saturn = new Planet( new Vector(9.5388, 0, 0, color(100, 100, 0)), new Vector(0, sqrt(G*Sun.m/9.5388), 0, color(0)), 5.685*pow(10, 26));
+
+  G = 1;
+  sloneczny.add(Sun);
+  sloneczny.add(Mercury);
+  sloneczny.add(Earth);
+  sloneczny.add(Venus);
+  sloneczny.add(Mars);
+  sloneczny.add(Jupiter);
+  sloneczny.add(Saturn);
+
+
+  size(1500, 1000);
+  background(200);
+
+  //tworzenie siatki
+  for (int i = 0; i < 31; i++) {
+
+    Line temp = new Line(-15, -15+i, 0, 15, -15+i, 0, color(150));
+    gridz.add(temp);
+  }
+  for (int i = 0; i < 31; i++) {
+
+    Line temp = new Line(-15+i, -15, 0, -15+i, 15, 0, color(150));
+    gridz.add(temp);
+  }
+  for (int i = 0; i < 31; i++) {
+
+    Line temp = new Line(0, -15+i, -15, 0, -15+i, 15, color(150));
+    gridx.add(temp);
+  }
+  for (int i = 0; i < 31; i++) {
+
+    Line temp = new Line(0, -15, -15+i, 0, 15, -15+i, color(150));
+    gridx.add(temp);
+  }
+  for (int i = 0; i < 31; i++) {
+
+    Line temp = new Line(-15, 0, -15+i, 15, 0, -15+i, color(150));
+    gridy.add(temp);
+  }
+  for (int i = 0; i < 31; i++) {
+
+    Line temp = new Line(-15+i, 0, -15, -15+i, 0, 15, color(150));
+    gridy.add(temp);
+  }
+  //deklaracja wersorów
+  i.display();
+  k.display();
+  j.display();
+
+  menu = "main";
+
+  basic = color(200);
+  background = basic;
+  mass_input = false;
+  pause = true;
+  show_menu = true;
+  //out prompt
+
+  print("Witaj!\n");
+  print("Skróty klawiszowe\n");
+  print("Lewo, prawo - obrót wokół OZ\n");
+  print("Góra, dół - zoom\n");
+  print("m - menu główne\n");
+  print("p - zatrzymaj ruch planet\n");
+  print("f - fast forward\n");
+  print("t - slow motion\n");
+  print("c - ustaw ciało jako centrum\n");
+  print("x - ustaw środek masy jako centrum\n");
+  print("z - ustaw (0,0,0) jako centrum\n");
+  print("s - włącz układ słoneczny\n");
+}
+
+void draw() {
+  background(background);
+  if (show_menu == true) {
+    translate(width/3, height/2);
+  } else {
+    translate(width/2, height/2);
+  }
+  if (GRID == 0) {
+  } else if (GRID == 3) {
+    for (int i = 0; i < gridx.size(); i++) {
+
+      gridx.get(i).display();
+    }
+  } else if (GRID == 2) {
+    for (int i = 0; i < gridx.size(); i++) {
+
+      gridy.get(i).display();
+    }
+  } else if (GRID == 1) {
+    for (int i = 0; i < gridx.size(); i++) {
+
+      gridz.get(i).display();
+    }
+  }
+  textSize(.7*delta);
+  i.display();
+  k.display();
+  j.display();
+
+  if (show_trace == true) {
+    solar.trace();
+  }
+  if (pause == false) {
+    solar.move();
+    t+=dt;
+  }
+  solar.display();
+
+
+  //GUI
+  if (show_menu == true) {
+    fill(200);
+    translate(-width/3, -height/2);
+    stroke(0);
+    rect(width*2/3, -10, height, 2*height);
+    translate(width*2/3, 0);
+    if (menu == "main") {
+
+      rect(delta, delta, bok, 5*delta);
+      fill(0);
+
+      text("t: "+str(floor(100*t)/100.0), delta, 2*delta);
+      if (dt == .01) {
+        text("Double time", delta, 4*delta);
+      }
+      fill(200);
+      for (int i = 0; i < 5; i++) {
+
+        rect(delta, delta+(i+3)*2*delta, bok, delta);
+
+        fill(0);
+        if (i < main_menu.length) {
+          text(main_menu[i], delta, 1.85*delta+(i+3)*2*delta);
+        }
+        fill(200);
+      }
+    }
+
+    //wyświetlanie cząstek układu
+    else if (menu == "list") {
+      float kwadrat = (width/3 - 4*delta/2)/3;
+      int licznik = 0;
+      for (int i = 0; i < 5; i++) {
+        for (int k = 0; k < 3; k++) {
+          if ((licznik) < solar.planety.size()) {
+            fill(color(red(solar.planety.get(licznik).c)*1.2, green((solar.planety.get(licznik).c))*1.2, blue((solar.planety.get(licznik).c))*1.2));
+          } else {
+            fill(200);
+          }
+          rect(delta/2+k*(kwadrat+delta/2), delta/2+i*(kwadrat+delta/2), kwadrat, kwadrat);
+          if (licznik < solar.planety.size()) {
+            fill(solar.planety.get(licznik).c);
+            ellipse((delta/2+k*(kwadrat+delta/2)) + kwadrat/2, delta/2+i*(kwadrat+delta/2) + kwadrat/2, kwadrat*.8, kwadrat*.8);
+          }
+          licznik++;
+        }
+      }
+    }
+
+    //menu tworzenia/edycji cząstek
+    else if (menu == "nowa" || menu == "set") {
+
+      rect(delta, delta, bok, delta);
+
+      for (int i = 0; i < 50; i++) {
+        colorMode(HSB);
+
+        fill(map(i, 0, 49, 0, 255), 255, 255);
+        rect(delta+i*bok/50, delta, bok/50, delta);
+        colorMode(RGB);
+      }
+
+      fill(200);
+      rect(2*delta, 3*delta, bok/2.5, delta);
+      fill(0);
+      text("M", delta, 3.85*delta);
+      if (mass_input == false) {
+        text(solar.planety.get(wybrana_planeta).m, 2*delta, 3.85*delta);
+      }
+      if (mass_input == true) {
+        text(mass_in, 2*delta, 3.85*delta);
+      }
+
+
+
+
+      fill(200);
+      rect(2*delta, 4.5*delta, bok/2.5, delta);
+      fill(0);
+      text("Vx", delta, 5.35*delta);
+      if (vx_input == false) {
+        text(solar.planety.get(wybrana_planeta).v.x, 2*delta, 5.35*delta);
+      }
+      if (vx_input == true) {
+        text(vx_in, 2*delta, 5.35*delta);
+      }
+
+      fill(200);
+      rect(2*delta, 6*delta, bok/2.5, delta);
+      fill(0);
+      text("Vy", delta, 6.85*delta);
+      if (vy_input == false) {
+        text(solar.planety.get(wybrana_planeta).v.y, 2*delta, 6.85*delta);
+      }
+      if (vy_input == true) {
+        text(vy_in, 2*delta, 6.85*delta);
+      }
+
+      fill(200);
+      rect(2*delta, 7.5*delta, bok/2.5, delta);
+      fill(0);
+      text("Vz", delta, 8.35*delta);
+      if (vz_input == false) {
+        text(solar.planety.get(wybrana_planeta).v.z, 2*delta, 8.35*delta);
+      }
+      if (vz_input == true) {
+        text(vz_in, 2*delta, 8.35*delta);
+      }
+
+
+      fill(200);
+      rect(2*delta, 9*delta, bok/2.5, delta);
+      fill(0);
+      text("x", delta, 9.85*delta);
+      if (posx_input == false) {
+        text(solar.planety.get(wybrana_planeta).pos.x, 2*delta, 9.85*delta);
+      }
+      if (posx_input == true) {
+        text(posx_in, 2*delta, 9.85*delta);
+      }
+
+      fill(200);
+      rect(2*delta, 10.5*delta, bok/2.5, delta);
+      fill(0);
+      text("y", delta, 11.35*delta);
+      if (posy_input == false) {
+        text(solar.planety.get(wybrana_planeta).pos.y, 2*delta, 11.35*delta);
+      }
+      if (posy_input == true) {
+        text(posy_in, 2*delta, 11.35*delta);
+      }
+
+      fill(200);
+      rect(2*delta, 12*delta, bok/2.5, delta);
+      fill(0);
+      text("z", delta, 12.85*delta);
+      if (posz_input == false) {
+        text(solar.planety.get(wybrana_planeta).pos.z, 2*delta, 12.85*delta);
+      }
+      if (posz_input == true) {
+        text(posz_in, 2*delta, 12.85*delta);
+      }
+
+
+      fill(200);
+      rect(2*delta, 13.5*delta, bok/2.5, delta);
+      fill(0);
+      text("R", delta, 14.35*delta);
+      if (radius_input == false) {
+        text(solar.planety.get(wybrana_planeta).r, 2*delta, 14.35*delta);
+      }
+      if (radius_input == true) {
+        text(radius_in, 2*delta, 14.35*delta);
+      }
+
+      fill(100);
+      rect(delta, 15*delta, bok, delta);
+      fill(0);
+      text("Add satellite", delta, 15.85*delta);
+
+
+
+
+      Planet temp = solar.planety.get(wybrana_planeta);
+      Vector dplus = new Vector(temp.pos.x+100*temp.v.x-solar.centre.pos.x, temp.pos.y+100*temp.v.y-solar.centre.pos.y, temp.pos.z+100*temp.v.z-solar.centre.pos.z, color(255));
+      Vector dminus = new Vector(temp.pos.x-100*temp.v.x-solar.centre.pos.x, temp.pos.y-100*temp.v.y-solar.centre.pos.y, temp.pos.z-100*temp.v.z-solar.centre.pos.z, color(255));
+      translate(-2*width/3, 0);
+      translate(width/3, height/2);
+      Line direction = new Line(dplus.x, dplus.y, dplus.z, dminus.x, dminus.y, dminus.z, color(255));
+      direction.display();
+      translate(-width/3, -height/2);
+      translate(2*width/3, 0);
+    } else if (menu == "satellite") {
+
+      rect(delta, delta, bok, delta);
+
+      for (int i = 0; i < 50; i++) {
+        colorMode(HSB);
+
+        fill(map(i, 0, 49, 0, 255), 255, 255);
+        rect(delta+i*bok/50, delta, bok/50, delta);
+        colorMode(RGB);
+      }
+
+      fill(200);
+      rect(2*delta, 3*delta, bok/2.5, delta);
+      fill(0);
+      text("M", delta, 3.85*delta);
+      if (mass_input == false) {
+        text(solar.planety.get(wybrana_planeta).m, 2*delta, 3.85*delta);
+      }
+      if (mass_input == true) {
+        text(mass_in, 2*delta, 3.85*delta);
+      }
+
+
+
+
+      fill(200);
+      rect(2*delta, 4.5*delta, bok/2.5, delta);
+      fill(0);
+      text("R", delta, 5.35*delta);
+      if (R_input == false) {
+        Vector temp = solar.planety.get(orbital_centre).pos.copy();
+        Vector temp2 = solar.planety.get(wybrana_planeta).pos.copy();
+        temp.mult(-1);
+        temp.add(temp2);
+        text(temp.len(), 2*delta, 5.35*delta);
+      }
+      if (R_input == true) {
+        text(R_in, 2*delta, 5.35*delta);
+      }
+
+      fill(200);
+      rect(2*delta, 6*delta, bok/2.5, delta);
+      fill(0);
+      text("θ", delta, 6.85*delta);
+      if (angle_input == false) {
+        text(initial_angle, 2*delta, 6.85*delta);
+      }
+      if (angle_input == true) {
+        text(angle_in, 2*delta, 6.85*delta);
+      }
+
+      fill(200);
+      rect(2*delta, 7.5*delta, bok/2.5, delta);
+      fill(0);
+      text("", delta, 8.35*delta);
+      if (vz_input == false) {
+        //text(solar.planety.get(wybrana_planeta).v.z, 2*delta, 8.35*delta);
+      }
+      if (vz_input == true) {
+        //text(vz_in, 2*delta, 8.35*delta);
+      }
+
+
+      fill(200);
+      rect(2*delta, 9*delta, bok/2.5, delta);
+      fill(0);
+      text("", delta, 9.85*delta);
+      if (posx_input == false) {
+        //text(solar.planety.get(wybrana_planeta).pos.x, 2*delta, 9.85*delta);
+      }
+      if (posx_input == true) {
+        //text(posx_in, 2*delta, 9.85*delta);
+      }
+
+      fill(200);
+      rect(2*delta, 10.5*delta, bok/2.5, delta);
+      fill(0);
+      text("", delta, 11.35*delta);
+      if (posy_input == false) {
+        //text(solar.planety.get(wybrana_planeta).pos.y, 2*delta, 11.35*delta);
+      }
+      if (posy_input == true) {
+        //text(posy_in, 2*delta, 11.35*delta);
+      }
+
+      fill(200);
+      rect(2*delta, 12*delta, bok/2.5, delta);
+      fill(0);
+      text("", delta, 12.85*delta);
+      if (posz_input == false) {
+        //text(solar.planety.get(wybrana_planeta).pos.z, 2*delta, 12.85*delta);
+      }
+      if (posz_input == true) {
+        //text(posz_in, 2*delta, 12.85*delta);
+      }
+
+
+      fill(200);
+      rect(2*delta, 13.5*delta, bok/2.5, delta);
+      fill(0);
+      text("r", delta, 14.35*delta);
+      if (radius_input == false) {
+        text(solar.planety.get(wybrana_planeta).r, 2*delta, 14.35*delta);
+      }
+      if (radius_input == true) {
+        text(radius_in, 2*delta, 14.35*delta);
+      }
+    } else if (menu == "parametry") {
+      fill(0);
+    } else if (menu == "display") {
+
+
+      rect(delta, delta, bok, delta);
+
+      for (int i = 0; i < 50; i++) {
+        colorMode(HSB);
+
+        fill(map(i, 0, 49, 0, 255), 255, 255);
+        rect(delta+i*bok/50, delta, bok/50, delta);
+        colorMode(RGB);
+      }
+      fill(basic);
+      rect(delta, 3*delta, bok, delta);
+      rect(delta, 5*delta, bok, delta);
+      rect(delta, 7*delta, bok/3, delta);
+      rect(delta+bok/3, 7*delta, bok/3, delta);
+      rect(delta+2*bok/3, 7*delta, bok/3, delta);
+      rect(delta, 9*delta, bok/3, delta);
+      rect(delta+bok/3, 9*delta, bok/3, delta);
+      rect(delta+2*bok/3, 9*delta, bok/3, delta);
+      rect(delta, 11*delta, bok, delta);
+
+      rect(delta, 13.25*delta, bok, .5*delta);
+      ellipse(map(r_scale, 1, 30, delta, delta+bok), 13.5*delta, delta, delta);
+
+
+      fill(0);
+      text("Kolor tła", delta, .85*delta);
+      text("Pokaż ścieżkę: "+show_trace, delta, 3.85*delta);
+      text("Projekcja ortonormalna", delta, 5.85*delta);
+      text("OZ", delta, 7.85*delta);
+      text("OX", delta+bok/3, 7.85*delta);
+      text("OY", delta+2*bok/3, 7.85*delta);
+      text("Grid Z", delta, 9.85*delta);
+      text("Grid X", delta+bok/3, 9.85*delta);
+      text("Grid Y", delta+2*bok/3, 9.85*delta);
+      text("Skalowanie planet", delta, 11.85*delta);
+    } else if (menu == "help") {
+      //translate(2*width/2,0);
+      fill(0);
+
+      text("Witaj!", delta, .85*delta);
+      text("Skróty klawiszowe: ", delta, 1.85*delta);
+      text("Lewo, prawo - obrót wokół OZ", delta, 2.85*delta);
+      text("Góra, dół - zoom", delta, 3.85*delta);
+      text("m - menu główne", delta, 4.85*delta);
+      text("p - zatrzymaj ruch planet", delta, 5.85*delta);
+      text("f - fast forward", delta, 6.85*delta);
+      text("t - slow motion", delta, 7.85*delta);
+      text("c - ustaw ciało jako centrum", delta, 8.85*delta);
+      text("x - układ środka masy", delta, 9.85*delta);
+      text("z - ustaw (0,0,0) jako centrum", delta, 10.85*delta);
+      text("s - włącz układ słoneczny", delta, 11.85*delta);
+    }
+  }
+  if (pause == true) {
+    if (show_menu == true) {
+      translate(-width*2/3, 0);
+    } else {
+      translate(-width/2, -height/2);
+    }
+    fill(200);
+    stroke(0);
+    rect(.5*delta, .5*delta, .25*delta, delta);
+    rect(1*delta, .5*delta, .25*delta, delta);
+  }
+}
