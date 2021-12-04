@@ -1,0 +1,165 @@
+Versor i = new Versor(1, 0, 0, color(200, 0, 0));
+Versor j = new Versor(0, 1, 0, color(0, 200, 0));
+Versor k = new Versor(0, 0, 1, color(0, 0, 200));
+
+class Versor {
+  float x, y, z, dispx, dispy;
+  color c;
+  Versor(float X, float Y, float Z, color C) {
+    x = X;
+    y = Y;
+    z = Z;
+    c = C;
+  }
+
+  void display() {
+
+    dispx = u*(baza[0][0]*(x*cos(theta)-y*sin(theta))+baza[1][0]*(x*sin(theta)+y*cos(theta))+baza[2][0]*z);
+    dispy = u*(baza[0][1]*(x*cos(theta)-y*sin(theta))+baza[1][1]*(x*sin(theta)+y*cos(theta))+baza[2][1]*z);
+    stroke(100);
+    line(0, 0, 100*dispx, 100*dispy);
+    fill(c);
+    ellipse(dispx, dispy, 5, 5);
+  }
+}
+
+
+
+class Point {
+  float x, y, z, dispx, dispy;
+  color c;
+  Point(float X, float Y, float Z, color C) {
+    x = X;
+    y = Y;
+    z = Z;
+    c = C;
+  }
+  void display() {
+    dispx = x*i.dispx+y*j.dispx+z*k.dispx;
+    dispy = x*i.dispy+y*j.dispy+z*k.dispy;
+    fill(c);
+    noStroke();
+    ellipse(dispx, dispy, 5, 5);
+  }
+}
+
+
+class Line {
+  float a, b, c, d;
+  float x1, y1, z1, x2, y2, z2;
+  color kolor;
+  Line(float X1, float Y1, float Z1, float X2, float Y2, float Z2, color C) {
+    x1 = X1;
+    y1 = Y1;
+    z1 = Z1;
+    x2 = X2;
+    y2 = Y2;
+    z2 = Z2;
+    kolor = C;
+  }
+  void display () {
+    a = x1*i.dispx+y1*j.dispx+z1*k.dispx;
+    b = x1*i.dispy+y1*j.dispy+z1*k.dispy;
+    c = x2*i.dispx+y2*j.dispx+z2*k.dispx;
+    d = x2*i.dispy+y2*j.dispy+z2*k.dispy;
+    stroke(kolor);
+    strokeWeight(1);
+    line(a, b, c, d);
+  }
+}
+
+
+class Vector {
+  float x, y, z, dispx, dispy;
+  float r = 10;
+  color c;
+
+  ArrayList<Vector> path = new ArrayList<Vector>();
+
+  Vector() {
+    x = 0;
+    y = 0;
+    z = 0;
+    c = color(200);
+  }
+  Vector(float X, float Y, float Z, color C) {
+    x = X;
+    y = Y;
+    z = Z;
+    c = C;
+  }
+  Vector(float X, float Y, float Z) {
+    x = X;
+    y = Y;
+    z = Z;
+    c = color(0, 0, 0);
+  }
+  Vector(float X, float Y, float Z, color C, float R) {
+    x = X;
+    y = Y;
+    z = Z;
+    c = C;
+    r = R;
+  }
+  Vector(float X, float Y, float Z, float R) {
+    x = X;
+    y = Y;
+    z = Z;
+    c = color(0, 0, 0);
+    r = R;
+  }
+  void display() {
+    dispx = x*i.dispx+y*j.dispx+z*k.dispx;
+    dispy = x*i.dispy+y*j.dispy+z*k.dispy;
+    stroke(c);
+    //line(0, 0, dispx, dispy);
+    fill(c);
+    stroke(0);
+    strokeWeight(.5);
+    if (scale_planets == true) {
+      ellipse(dispx, dispy, r*u/10, r*u/10);
+    } else {
+      ellipse(dispx, dispy, r_scale*r, r_scale*r);
+    }
+    noStroke();
+  }
+
+  float len() {
+    float magnitude = sqrt(x*x+y*y+z*z);
+    return magnitude;
+  }
+
+  void add(Vector u) {
+    x += u.x;
+    y += u.y;
+    z += u.z;
+  }
+
+  void  mult(float f) {
+    x *= f;
+    y *= f;
+    z *= f;
+  }
+  Vector copy() {
+    Vector kopia = new Vector(x, y, z);
+    return kopia;
+  }
+
+  void path() {
+    path.add(new Vector(x, y, z));
+
+    for (int i = 0; i <path.size(); i++) {
+      fill(c);
+      point(path.get(i).dispx, path.get(i).dispy);
+    }
+  }
+}
+
+Vector sum(Vector S1, Vector S2) {
+  Vector S3 = new Vector(S1.x+S2.x, S1.y+S2.y, S1.z+S2.z, color(0, 0, 200));
+  return S3;
+}
+Vector multi(float m, Vector S1) {
+  Vector S2 = new Vector(m*S1.x, m*S1.y, m*S1.z, S1.c);
+  return S2;
+}
