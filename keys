@@ -1,0 +1,301 @@
+void keyPressed() {
+  if (keyCode == UP) {
+    u*=1.1;
+  }
+  if (keyCode == DOWN) {
+    u/=1.1;
+  }
+  if (keyCode == LEFT) {
+    theta+=PI/180;
+  }
+  if (keyCode == RIGHT) {
+    theta-=PI/180;
+  }
+
+
+  if (key == 'z') {
+    if (follow_com == true) {
+      follow_com = false;
+    }
+    solar.centre(solar.zero);
+  }
+
+  if (key == 'c' && (menu == "set" || menu == "nowa")) {
+    if (follow_com == true) {
+      follow_com = false;
+    }
+    solar.centre(solar.planety.get(wybrana_planeta));
+  }
+
+  if (key == 'x') {
+    follow_com = true;
+    solar.centre(solar.COM);
+  }
+
+
+
+
+  if (key == 'm') {
+    menu = "main";
+  }
+  if (key == 'h') {
+    if (show_menu == true) {
+      show_menu = false;
+    } else {
+      show_menu = true;
+    }
+  }
+
+
+  if (key == 's') {
+    t = 0;
+    if (sloneczny_on == true) {
+      solar.planety = uklad;
+      solar.n = uklad.size();
+      G = 1;
+      sloneczny_on = false;
+    } else {
+      menu = "main";
+      solar.planety = sloneczny;
+      solar.n = sloneczny.size();
+      G = 1.98127*pow(10, -29);
+      sloneczny_on = true;
+      print(G);
+    }
+  }
+
+
+  if (keyCode == 32) {
+    if (pause == true) {
+      pause = false;
+    } else if (pause == false) {
+      pause = true;
+    }
+  }
+  if (key == 't') {
+    if (dt == .0001) {
+      dt = .001;
+    } else {
+      dt = .0001;
+    }
+  }
+  if (key == 'f') {
+    if (dt == .01) {
+      dt = .001;
+    } else {
+      dt = .01;
+    }
+  }
+
+  if (mass_input == true) {
+    if (keyCode == ENTER) {
+      solar.planety.get(wybrana_planeta).m = float(mass_in);
+      mass_input = false;
+    } else if (keyCode == BACKSPACE) {
+      String new_mass_in = "";
+      for (int i = 0; i < mass_in.length()-1; i++) {
+        new_mass_in += mass_in.charAt(i);
+      }
+      mass_in = new_mass_in;
+    } else {
+      mass_in += key;
+    }
+  }
+
+  if (v_input == true) {
+    if (keyCode == ENTER) {
+      solar.planety.get(wybrana_planeta).v.mult(float(v_in)/solar.planety.get(wybrana_planeta).v.len());
+      v_input = false;
+    } else if (keyCode == BACKSPACE) {
+      String new_v_in = "";
+      for (int i = 0; i < v_in.length()-1; i++) {
+        new_v_in += v_in.charAt(i);
+      }
+      v_in = new_v_in;
+    } else {
+      v_in += key;
+    }
+  }
+
+  if (vx_input == true) {
+    if (keyCode == ENTER) {
+      solar.planety.get(wybrana_planeta).v.x = float(vx_in);
+      vx_input = false;
+    } else if (keyCode == BACKSPACE) {
+      String new_v_in = "";
+      for (int i = 0; i < vx_in.length()-1; i++) {
+        new_v_in += vx_in.charAt(i);
+      }
+      vx_in = new_v_in;
+    } else {
+      vx_in += key;
+    }
+  }
+
+  if (vy_input == true) {
+    if (keyCode == ENTER) {
+      solar.planety.get(wybrana_planeta).v.y = float(vy_in);
+      vy_input = false;
+    } else if (keyCode == BACKSPACE) {
+      String new_v_in = "";
+      for (int i = 0; i < vy_in.length()-1; i++) {
+        new_v_in += vy_in.charAt(i);
+      }
+      vy_in = new_v_in;
+    } else {
+      vy_in += key;
+    }
+  }
+  if (vz_input == true) {
+    if (keyCode == ENTER) {
+      solar.planety.get(wybrana_planeta).v.z = float(vz_in);
+      vz_input = false;
+    } else if (keyCode == BACKSPACE) {
+      String new_v_in = "";
+      for (int i = 0; i < vz_in.length()-1; i++) {
+        new_v_in += vz_in.charAt(i);
+      }
+      vz_in = new_v_in;
+    } else {
+      vz_in += key;
+    }
+  }
+
+  if (posx_input == true) {
+    if (keyCode == ENTER) {
+      solar.planety.get(wybrana_planeta).pos.x = float(posx_in);
+      posx_input = false;
+    } else if (keyCode == BACKSPACE) {
+      String new_v_in = "";
+      for (int i = 0; i < posx_in.length()-1; i++) {
+        new_v_in += posx_in.charAt(i);
+      }
+      posx_in = new_v_in;
+    } else {
+      posx_in += key;
+    }
+  }
+
+  if (posy_input == true) {
+    if (keyCode == ENTER) {
+      solar.planety.get(wybrana_planeta).pos.y = float(posy_in);
+      posy_input = false;
+    } else if (keyCode == BACKSPACE) {
+      String new_v_in = "";
+      for (int i = 0; i < posy_in.length()-1; i++) {
+        new_v_in += posy_in.charAt(i);
+      }
+      posy_in = new_v_in;
+    } else {
+      posy_in += key;
+    }
+  }
+  if (posz_input == true) {
+    if (keyCode == ENTER) {
+      solar.planety.get(wybrana_planeta).pos.z = float(posz_in);
+      posz_input = false;
+    } else if (keyCode == BACKSPACE) {
+      String new_v_in = "";
+      for (int i = 0; i < posz_in.length()-1; i++) {
+        new_v_in += posz_in.charAt(i);
+      }
+      posz_in = new_v_in;
+    } else {
+      posz_in += key;
+    }
+  }
+
+
+  if (radius_input == true) {
+    if (keyCode == ENTER) {
+      solar.planety.get(wybrana_planeta).r = float(radius_in);
+      radius_input = false;
+    } else if (keyCode == BACKSPACE) {
+      String new_v_in = "";
+      for (int i = 0; i < radius_in.length()-1; i++) {
+        new_v_in += radius_in.charAt(i);
+      }
+      radius_in = new_v_in;
+    } else {
+      radius_in += key;
+    }
+  }
+
+  if (angle_input == true) {
+    if (keyCode == ENTER) {
+      initial_angle = float(angle_in)*PI/180;
+      Vector temp1 = solar.planety.get(wybrana_planeta).pos.copy();
+
+      Vector temp2 = solar.planety.get(orbital_centre).pos.copy();
+      Vector temp3 = solar.planety.get(orbital_centre).pos.copy();
+      temp2.mult(-1);
+      temp1.add(temp2);
+      solar.planety.get(wybrana_planeta).pos = new Vector(cos(initial_angle), sin(initial_angle), 0, solar.planety.get(wybrana_planeta).pos.c);
+      solar.planety.get(wybrana_planeta).pos.mult(temp1.len());
+      solar.planety.get(wybrana_planeta).pos.add(temp3);
+
+      solar.planety.get(wybrana_planeta).v = new Vector();
+      solar.planety.get(wybrana_planeta).v.add(solar.planety.get(orbital_centre).v.copy());
+      solar.planety.get(wybrana_planeta).v.add(new Vector(sqrt(G*solar.planety.get(orbital_centre).m/temp1.len())*(-sin(initial_angle)), sqrt(G*solar.planety.get(orbital_centre).m/temp1.len())*cos(initial_angle), 0));
+
+
+      angle_input = false;
+    } else if (keyCode == BACKSPACE) {
+      String new_v_in = "";
+      for (int i = 0; i < angle_in.length()-1; i++) {
+        new_v_in += angle_in.charAt(i);
+      }
+      angle_in = new_v_in;
+    } else {
+      angle_in += key;
+    }
+  }
+
+  if (R_input == true) {
+    if (keyCode == ENTER) {
+      Vector temp1 = solar.planety.get(wybrana_planeta).pos.copy();
+
+      Vector temp2 = solar.planety.get(orbital_centre).pos.copy();
+      Vector temp3 = solar.planety.get(orbital_centre).pos.copy();
+      temp2.mult(-1);
+
+      temp1.add(temp2);
+      temp1.mult(float(R_in)/temp1.len());
+      temp3.add(temp1);
+      solar.planety.get(wybrana_planeta).pos = temp3;
+
+      solar.planety.get(wybrana_planeta).v = new Vector();
+      solar.planety.get(wybrana_planeta).v.add(solar.planety.get(orbital_centre).v.copy());
+      solar.planety.get(wybrana_planeta).v.add(new Vector(-sqrt(G*solar.planety.get(orbital_centre).m/temp1.len())*sin(initial_angle), sqrt(G*solar.planety.get(orbital_centre).m/temp1.len())*cos(initial_angle), 0));
+      R_input = false;
+    } else if (keyCode == BACKSPACE) {
+      String new_v_in = "";
+      for (int i = 0; i < R_in.length()-1; i++) {
+        new_v_in += R_in.charAt(i);
+      }
+      R_in = new_v_in;
+    } else {
+      R_in += key;
+    }
+  }
+
+  if ((menu == "set" || menu == "nowa" || menu == "satellite") && key == 'd') {
+    menu = "main";
+    solar.n --;
+    solar.planety.remove(wybrana_planeta);
+  }
+  if (dt_input == true) {
+    if (keyCode == ENTER) {
+      dt = float(dt_in);
+      dt_input = false;
+    } else if (keyCode == BACKSPACE) {
+      String new_v_in = "";
+      for (int i = 0; i < dt_in.length()-1; i++) {
+        new_v_in += dt_in.charAt(i);
+      }
+      dt_in = new_v_in;
+    } else {
+      dt_in += key;
+    }
+  }
+}
