@@ -1,0 +1,241 @@
+
+
+void mousePressed() {
+
+
+
+  if (mouseX > 2*width/3 && menu == "main") {
+    if (mouseY > 7*delta && mouseY < 8*delta) {
+      menu = "list";
+    }
+    if (mouseY > 9*delta && mouseY < 10*delta) {
+      menu = "nowa";
+      pause = true;
+
+
+      Planet new_planet = new Planet(solar.centre.pos.copy(), new Vector(0, 0, 0, color(0)), 1);
+
+      solar.n++;
+      solar.planety.add(new_planet);
+      wybrana_planeta = solar.n-1;
+    }
+    if (mouseY > 11*delta && mouseY < 12*delta) {
+      menu = "parametry";
+    }
+    if (mouseY > 13*delta && mouseY < 14*delta) {
+      menu = "display";
+    }
+    if (mouseY > 15*delta && mouseY < 16*delta) {
+      menu = "help";
+    }
+  } else if (menu == "list") {
+    color szukam = get(mouseX, mouseY);
+    for (int i = 0; i < solar.planety.size(); i++) {
+      if (solar.planety.get(i).c == szukam) {
+        menu = "set";
+        wybrana_planeta = i;
+      }
+    }
+  } else if (menu == "set" || menu == "nowa") {
+
+    if (mouseY > delta && mouseY < 2*delta && mouseX > 2*width/3 + delta && mouseX < 2*width/3 + delta+bok) {
+      colorMode(HSB);
+      solar.planety.get(wybrana_planeta).c = color(map(mouseX, 2*width/3 + delta, 2*width/3 + delta+bok, 0, 255), 255, 255);
+      colorMode(RGB);
+    }
+    if (mouseY > 3*delta && mouseY < 4*delta && mouseX > 2*width/3 && mouseX < 2*width/3 + 2*delta + bok/2.5) {
+      print("mouseX - 2*width/3 - bok - delt");
+      mass_input = true;
+      mass_in = "";
+    }
+
+    if (mouseY > 4.5*delta && mouseY < 5.5*delta && mouseX > 2*width/3 && mouseX < 2*width/3 + 2*delta + bok/2.5) {
+
+      vx_input = true;
+      vx_in = "";
+    }
+    if (mouseY > 6*delta && mouseY < 7*delta && mouseX > 2*width/3 && mouseX < 2*width/3 + 2*delta + bok/2.5) {
+
+      vy_input = true;
+      vy_in = "";
+    }
+    if (mouseY > 7.5*delta && mouseY < 8.5*delta && mouseX > 2*width/3 && mouseX < 2*width/3 + 2*delta + bok/2.5) {
+
+      vz_input = true;
+      vz_in = "";
+    }
+
+    if (mouseY > 9*delta && mouseY < 10*delta && mouseX > 2*width/3 && mouseX < 2*width/3 + 2*delta + bok/2.5) {
+
+      posx_input = true;
+      posx_in = "";
+    }
+    if (mouseY > 10.5*delta && mouseY < 11.5*delta && mouseX > 2*width/3 && mouseX < 2*width/3 + 2*delta + bok/2.5) {
+
+      posy_input = true;
+      posy_in = "";
+    }
+    if (mouseY > 12*delta && mouseY < 13*delta && mouseX > 2*width/3 && mouseX < 2*width/3 + 2*delta + bok/2.5) {
+
+      posz_input = true;
+      posz_in = "";
+    }
+
+    if (mouseY > 13.5*delta && mouseY < 14.5*delta && mouseX > 2*width/3 && mouseX < 2*width/3 + 2*delta + bok/2.5) {
+
+      radius_input = true;
+      radius_in = "";
+    }
+
+    if (mouseY > 15*delta && mouseY < 16*delta && mouseX > 2*width/3) {
+      pause = true;
+      menu = "satellite";
+      orbital_centre = wybrana_planeta;
+      Planet new_planet;
+
+      initial_angle = 0;
+      Vector temppos = new Vector(solar.planety.get(wybrana_planeta).pos.x, solar.planety.get(wybrana_planeta).pos.y, solar.planety.get(wybrana_planeta).pos.z, color(100));
+      Vector tempvel = new Vector(solar.planety.get(wybrana_planeta).v.x, solar.planety.get(wybrana_planeta).v.y, solar.planety.get(wybrana_planeta).v.z, color(100));
+
+      temppos.add(new Vector(2, 0, 0, color(0)));
+      tempvel.add(new Vector(sqrt(G*solar.planety.get(wybrana_planeta).m/2)*(-sin(initial_angle)), sqrt(G*solar.planety.get(wybrana_planeta).m/2)*cos(initial_angle), 0));
+
+      new_planet = new Planet(temppos, tempvel, 1);
+      solar.n++;
+      solar.planety.add(new_planet);
+      wybrana_planeta = solar.n-1;
+    }
+  } else if ( menu == "display") {
+    if (mouseY > delta && mouseY < 2*delta && mouseX > 2*width/3 + delta && mouseX < 2*width/3 + delta+bok) {
+      colorMode(HSB);
+      background = color(map(mouseX, 2*width/3 + delta, 2*width/3 + delta+bok, 0, 255), 255, 255);
+      colorMode(RGB);
+    }
+    if (mouseY > 3*delta && mouseY < 4*delta && mouseX > 2*width/3 + delta && mouseX < 2*width/3 + delta+bok) {
+      if (show_trace == true) {
+        show_trace = false;
+        solar.T.trace.clear();
+      } else if (show_trace == false) {
+        show_trace = true;
+      }
+    }
+
+
+    if (mouseY > 5*delta && mouseY < 6*delta && mouseX > 2*width/3 + delta && mouseX < 2*width/3 + delta+bok) {
+
+
+
+      baza[0][0] = -1/sqrt(2);
+      baza[0][1] = 1/sqrt(2);
+      baza[1][0] = 1;
+      baza[1][1] = 0;
+      baza[2][0] = 0;
+      baza[2][1] = -1;
+    }
+
+
+    if (mouseY > 7*delta && mouseY < 8*delta && mouseX > 2*width/3 + delta && mouseX < 2*width/3 + delta+bok) {
+      baza[0][0] = 1;
+      baza[0][1] = 0;
+      baza[1][0] = 0;
+      baza[1][1] = -1;
+      baza[2][0] = 0;
+      baza[2][1] = 0;
+      theta = 0;
+    }
+    if (mouseY > 7*delta && mouseY < 8*delta && mouseX > 2*width/3 + delta + bok/3 && mouseX < 2*width/3 + delta+bok) {
+      baza[0][0] = 0;
+      baza[0][1] = 0;
+      baza[1][0] = 1;
+      baza[1][1] = 0;
+      baza[2][0] = 0;
+      baza[2][1] = -1;
+      theta = 0;
+    }
+    if (mouseY > 7*delta && mouseY < 8*delta && mouseX > 2*width/3 + delta + 2*bok/3 && mouseX < 2*width/3 + delta+bok) {
+      baza[0][0] = -1;
+      baza[0][1] = 0;
+      baza[1][0] = 0;
+      baza[1][1] = 0;
+      baza[2][0] = 0;
+      baza[2][1] = -1;
+      theta = 0;
+    }
+
+    if (mouseY > 9*delta && mouseY < 10*delta && mouseX > 2*width/3 + delta && mouseX < 2*width/3 + delta+bok) {
+      if (GRID == 1) {
+        GRID = 0;
+      } else {
+        GRID = 1;
+      }
+    }
+    if (mouseY > 9*delta && mouseY < 10*delta && mouseX > 2*width/3 + delta + bok/3 && mouseX < 2*width/3 + delta+bok) {
+      GRID = 3;
+    }
+    if (mouseY > 9*delta && mouseY < 10*delta && mouseX > 2*width/3 + delta + 2*bok/3 && mouseX < 2*width/3 + delta+bok) {
+
+      GRID = 2;
+    }
+    if (mouseY > 11*delta && mouseY < 12*delta && mouseX > 2*width/3 + delta && mouseX < 2*width/3 + delta+bok) {
+      if (scale_planets == true) {
+        scale_planets = false;
+      } else {
+        scale_planets = true;
+      }
+    }
+    if (mouseY > 13*delta && mouseY < 14*delta && mouseX > 2*width/3 + delta && mouseX < 2*width/3 + delta+bok) {
+      r_scale = map(mouseX -  2*width/3, delta, delta+bok, 1, 30);
+    }
+  } else if (menu == "satellite") {
+
+    if (mouseY > delta && mouseY < 2*delta && mouseX > 2*width/3 + delta && mouseX < 2*width/3 + delta+bok) {
+      colorMode(HSB);
+      solar.planety.get(solar.n-1).c = color(map(mouseX, 2*width/3 + delta, 2*width/3 + delta+bok, 0, 255), 255, 255);
+      colorMode(RGB);
+    }
+
+    if (mouseY > 3*delta && mouseY < 4*delta && mouseX > 2*width/3) {
+
+      mass_input = true;
+      mass_in = "";
+    }
+
+    if (mouseY > 4.5*delta && mouseY < 5.5*delta && mouseX > 2*width/3) {
+
+      R_input = true;
+      R_in = "";
+    }
+    if (mouseY > 6*delta && mouseY < 7*delta && mouseX > 2*width/3) {
+
+      angle_input = true;
+      angle_in = "";
+    }
+    if (mouseY > 7.5*delta && mouseY < 8.5*delta && mouseX > 2*width/3) {
+
+      //vz_input = true;
+      //vz_in = "";
+    }
+
+    if (mouseY > 9*delta && mouseY < 10*delta && mouseX > 2*width/3) {
+
+      //posx_input = true;
+      //posx_in = "";
+    }
+    if (mouseY > 10.5*delta && mouseY < 11.5*delta && mouseX > 2*width/3) {
+
+      //      posy_input = true;
+      //      posy_in = "";
+    }
+    if (mouseY > 12*delta && mouseY < 13*delta && mouseX > 2*width/3) {
+
+      //      posz_input = true;
+      //      posz_in = "";
+    }
+
+    if (mouseY > 13.5*delta && mouseY < 14.5*delta && mouseX > 2*width/3) {
+
+      radius_input = true;
+      radius_in = "";
+    }
+  }
+}
