@@ -1,0 +1,177 @@
+class Trace {
+  int doit = 1;
+  ArrayList<Point> trace = new ArrayList<Point>();
+  {
+  }
+
+  void display(Vector v, Vector centre) {
+    if (doit == 1) {
+      float x = v.x-centre.x;
+      float y = v.y-centre.y;
+      float z = v.z-centre.z;
+      color c = color(red(v.c)*1.2, green(v.c)*1.2, blue(v.c)*1.2);
+      Point temp = new Point(x, y, z, c);
+      trace.add(temp);
+    }
+    for (int i = 0; i < trace.size(); i++) {
+      trace.get(i).display();
+    }
+  }
+}
+
+
+
+
+class Planet {
+  Vector pos, v, a;
+
+  float m;
+  color c;
+  float r = 5;
+  Planet(Vector P0, Vector V0, float M) {
+    pos = P0;
+    v = V0;
+    m = M;
+    c = P0.c;
+    a = new Vector(0, 0, 0, color(0));
+  }
+  Planet(Vector P0, Vector V0, float M, float R) {
+    pos = P0;
+    v = V0;
+    m = M;
+    c = P0.c;
+    a = new Vector(0, 0, 0, color(0));
+    r = R;
+  }
+
+  void move() {
+    v = sum(v, multi(dt, a));
+    pos = sum(pos, multi(dt, v));
+  }
+  void display(Vector centre) {
+    pos.c = c;
+    Vector temp;
+    if (r!=10) {
+      temp = new Vector(pos.x-centre.x, pos.y-centre.y, pos.z-centre.z, pos.c, r);
+    } else {
+      temp = new Vector(pos.x-centre.x, pos.y-centre.y, pos.z-centre.z, pos.c);
+    }
+    temp.display();
+  }
+}
+
+class Uklad {
+  ArrayList<Planet> planety;
+  int n;
+
+  Trace T = new Trace();
+  Planet centre, zero, COM;
+  Uklad(ArrayList<Planet> initial) {
+    planety = initial;
+    n = planety.size();
+
+
+    centre = new Planet(new Vector(0, 0, 0, color(0)), new Vector(0, 0, 0, color(0)), 0);
+
+    zero = new Planet(new Vector(0, 0, 0, color(0)), new Vector(0, 0, 0, color(0)), 0);
+    COM = new Planet(com(), new Vector(0, 0, 0, color(0)), 0);
+  }
+
+  void display() {
+
+
+    COM.pos = com();
+
+    for (int i = 0; i< n; i++) {
+      planety.get(i).display(centre.pos);
+    }
+    //T.display(COM.pos, zero.pos);
+  }
+  void move() {
+    Vector[] Newton = new Vector[n];
+    for (int i = 0; i<n; i++) {
+      Vector force = new Vector(0, 0, 0, color(0));
+      for (int k = 0; k<n; k++) {
+        if (i!=k) {
+          Vector dpos = new Vector(planety.get(i).pos.x-planety.get(k).pos.x, planety.get(i).pos.y-planety.get(k).pos.y, planety.get(i).pos.z-planety.get(k).pos.z, color(0));
+          dpos.mult(-G*planety.get(k).m*pow(dpos.len(), -3));
+          force.add(dpos);
+        }
+      }
+      Newton[i] = force;
+    }
+
+    for (int i = 0; i < n; i++) {
+      planety.get(i).a = Newton[i];
+      planety.get(i).move();
+    }
+  }
+  void trace() {
+    for (int i = 0; i < n; i++) {
+      T.display(planety.get(i).pos, centre.pos);
+      //tplanety.get(i).pos.path();
+    }
+  }
+
+
+
+
+
+
+
+  //Vector[] Newton() {
+
+  //  return Newton;
+  //}
+
+  void centre(Planet new_centre) {
+    for (int i = 0; i<T.trace.size(); i++) {
+
+      T.trace.get(i).x += centre.pos.x - new_centre.pos.x;
+      T.trace.get(i).y += centre.pos.y - new_centre.pos.y;
+      T.trace.get(i).z += centre.pos.z - new_centre.pos.z;
+    }
+    centre = new_centre;
+  }
+
+  Vector com() {
+
+    Vector com = new Vector();
+    float total_mass = 0;
+    for (int i = 0; i < planety.size(); i++) {
+      Vector temp = new Vector(planety.get(i).pos.x, planety.get(i).pos.y, planety.get(i).pos.z, color(0));
+      float temp_m = planety.get(i).m;
+      total_mass += temp_m;
+      temp.mult(temp_m);
+      com.add(temp);
+    }
+
+    com.mult(1/total_mass);
+    com.c = color(200, 100, 0);
+
+    return com;
+  }
+
+  float Energy() {
+    float Energy = 0;
+
+    for (int i = 0; i < n; i++) {
+      Energy+=planety.get(i).m*pow(planety.get(i).v.len(), 2);
+    }
+    for (int i = 0; i < n; i++) {
+      for (int k = 0; k<n; k++) {
+        if (k!=i) {
+          Vector dpos = new Vector(planety.get(i).pos.x-planety.get(k).pos.x, planety.get(i).pos.y-planety.get(k).pos.y, planety.get(i).pos.z-planety.get(k).pos.z, color(0));
+          Energy += - G*planety.get(i).m*planety.get(k).m/dpos.len();
+        }
+      }
+    }
+
+    return Energy;
+  }
+}
+
+//float G(float new_time){
+//  float new_G = 6.67*pow(10, -11);
+//  return new_G;
+//}
